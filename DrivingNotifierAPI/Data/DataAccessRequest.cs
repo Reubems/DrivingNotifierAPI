@@ -28,7 +28,7 @@ namespace DrivingNotifierAPI.Data
         public Request GetRequest(string requestorPhone, string replierPhone)
         {
             var filter = Builders<Request>.Filter.And(Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone), Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
-            return db.GetCollection<Request>("Requests").Find(filter).First();
+            return db.GetCollection<Request>("Requests").Find(filter).FirstOrDefault();
         }
 
         public async Task CreateRequest(Request request)
@@ -47,8 +47,6 @@ namespace DrivingNotifierAPI.Data
             var filter = Builders<Request>.Filter.And(Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone), Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
             var update = Builders<Request>.Update.Set(s => s.State, state);
             await db.GetCollection<Request>("Requests").UpdateOneAsync(filter, update);
-
-            //TODO: Depending on the state, we update the property Contacts of the requestor adding the replier's ObjectId with add().
         }
 
         public async Task DeleteRequest(string requestorPhone, string replierPhone)

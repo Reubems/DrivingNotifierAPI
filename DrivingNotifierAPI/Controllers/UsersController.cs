@@ -155,5 +155,27 @@ namespace DrivingNotifierAPI.Controllers
                 await dataUser.UpdateUserPlayerID(user);
             }
         }
+        
+        // POST: api/Users/PushNotification
+        [Route("PushNotification")]
+        [HttpPost(Name = "PushNotification")]
+        public IActionResult PushNotification([FromBody] string drivingPhone)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = dataUser.GetUserByPhone(drivingPhone);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            dataUser.PushNotification(drivingPhone);
+            
+            return NoContent();
+        } 
     }
 }

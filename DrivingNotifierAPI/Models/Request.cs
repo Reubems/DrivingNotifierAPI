@@ -17,11 +17,10 @@ namespace DrivingNotifierAPI.Models
         public string ReplierPhone { get; set; }
         [BsonElement("State")]
         public RequestState State { get; set; }
-
     }
 
     public enum RequestState
-    {
+    {   //In BSON they are 0, 1, 2, 3 respectively.
         NEW, PENDING, ACCEPTED, DENIED
     }
 }

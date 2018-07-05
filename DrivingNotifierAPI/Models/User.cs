@@ -27,6 +27,6 @@ namespace DrivingNotifierAPI.Models
 
         [BsonElement("Contacts")]
         [BsonRepresentation(BsonType.String)]
-        public List<string> Contacts { get; set; }
+        public List<ObjectId> Contacts { get; set; }
     }
 }

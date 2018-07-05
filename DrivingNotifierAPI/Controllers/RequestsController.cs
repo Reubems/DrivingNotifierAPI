@@ -13,10 +13,12 @@ namespace DrivingNotifierAPI.Controllers
     public class RequestsController : Controller
     {
         private readonly DataAccessRequest dataRequest;
+        private readonly DataAccessUser dataUser;
 
-        public RequestsController(DataAccessRequest data)
+        public RequestsController(DataAccessRequest dataForRequest, DataAccessUser dataForUser)
         {
-            dataRequest = data;
+            dataRequest = dataForRequest;
+            dataUser = dataForUser;
         }
 
         // GET: api/Requests
@@ -70,10 +72,7 @@ namespace DrivingNotifierAPI.Controllers
             if (requestFetched == null)
             {
                 await dataRequest.CreateRequest(request);
-                return CreatedAtAction("getRequestByPhones", new {
-                    requestorPhone = request.RequestorPhone,
-                    replierPhone = request.ReplierPhone }, 
-                    request);
+                return Ok(); //TODO change for other // https://github.com/Microsoft/aspnet-api-versioning/issues/18
             }
 
             return BadRequest(ModelState);
@@ -87,9 +86,16 @@ namespace DrivingNotifierAPI.Controllers
                 return BadRequest(ModelState);
             }
             var requestFetched = dataRequest.GetRequest(request.RequestorPhone, request.ReplierPhone);
-            if (requestFetched == null)
+            if (requestFetched != null)
             {
                 await dataRequest.UpdateRequestState(request.RequestorPhone, request.ReplierPhone, request.State);
+            }
+
+            // Add the ObjectId to the Contacts lists of the user, in case request is accepted.
+            if (request.State.Equals(RequestState.ACCEPTED))
+            {
+                //Update the list of the replier in the database.
+                await dataUser.UpdateUserContactList(request.RequestorPhone, request.ReplierPhone);
             }
 
             return Ok(request);
