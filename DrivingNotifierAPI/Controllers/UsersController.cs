@@ -23,7 +23,7 @@ namespace DrivingNotifierAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public Task<IEnumerable<User>> GetUser()
+        public Task<IEnumerable<User>> GetUsers()
         {
             return dataUser.GetUsers();
         }
@@ -95,8 +95,8 @@ namespace DrivingNotifierAPI.Controllers
             }
 
             //We only add a new user if its phone does not already exist
-            var usersWithThatPhone = dataUser.GetUserByPhone(user.Phone);  
-            if (usersWithThatPhone != null)
+            var usersWithThatPhone = dataUser.GetUserByPhone(user.Phone);
+            if (usersWithThatPhone == null)
             {
                 await dataUser.InsertUser(user);
                 return CreatedAtAction("getUserByPhoneNumber", new { phone = user.Phone }, user);
@@ -105,9 +105,9 @@ namespace DrivingNotifierAPI.Controllers
             return BadRequest(ModelState);
         }
 
-        
+
         // DELETE: api/Users/54235434
-        [HttpDelete]
+        [HttpDelete("{phone}")]
         public async Task<IActionResult> DeleteUser([FromRoute] string phone)
         {
             if (!ModelState.IsValid)
@@ -123,7 +123,7 @@ namespace DrivingNotifierAPI.Controllers
 
             await dataUser.DeleteUser(user);
           
-            return Ok(user);
+            return Ok();
         }
 
         //------------------------------------------------------------------------------------------
@@ -138,12 +138,12 @@ namespace DrivingNotifierAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            await checkPlayerIdAsync(user);
+            await CheckPlayerIdAsync(user);
 
             return CreatedAtAction("GetUser", new { phone = user.Phone }, user);
         }
 
-        private async Task checkPlayerIdAsync(User user)
+        private async Task CheckPlayerIdAsync(User user)
         {
             string phone = user.Phone;
             string playerId = user.PlayerID;

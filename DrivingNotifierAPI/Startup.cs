@@ -30,6 +30,8 @@ namespace DrivingNotifierAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTransient<DataAccessUser>();
+            services.AddTransient<DataAccessRequest>();
+
             services.AddMvc();
 
             services.AddDbContext<DrivingNotifierAPIContext>(options =>
