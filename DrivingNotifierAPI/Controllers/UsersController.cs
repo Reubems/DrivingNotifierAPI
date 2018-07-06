@@ -99,7 +99,7 @@ namespace DrivingNotifierAPI.Controllers
             if (usersWithThatPhone == null)
             {
                 await dataUser.InsertUser(user);
-                return CreatedAtAction("getUserByPhoneNumber", new { phone = user.Phone }, user);
+                return Ok();
             }
 
             return BadRequest(ModelState);
@@ -140,7 +140,7 @@ namespace DrivingNotifierAPI.Controllers
 
             await CheckPlayerIdAsync(user);
 
-            return CreatedAtAction("GetUser", new { phone = user.Phone }, user);
+            return Ok(); //CreatedAtAction("ActionMethodName", dto);
         }
 
         private async Task CheckPlayerIdAsync(User user)
@@ -176,6 +176,34 @@ namespace DrivingNotifierAPI.Controllers
             dataUser.PushNotification(drivingPhone);
             
             return NoContent();
-        } 
+        }
+
+        // PUT: api/Users/TrackingEnabled
+        [HttpPut("TrackingEnabled")]
+        public async Task<IActionResult> UpdateUserTrackingEnabledState([FromBody] User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await dataUser.UpdateUserTrackingEnabledState(user);
+
+            return Ok(); 
+        }
+
+        // PUT: api/Users/Mute
+        [HttpPut("Mute")]
+        public async Task<IActionResult> UpdateUserMuteState([FromBody] User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await dataUser.UpdateUserMuteState(user);
+
+            return Ok();
+        }
     }
 }

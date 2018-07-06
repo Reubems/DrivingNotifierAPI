@@ -51,6 +51,21 @@ namespace DrivingNotifierAPI.Data
             await db.GetCollection<User>("Users").UpdateOneAsync(filter, update);
         }
 
+        public async Task UpdateUserTrackingEnabledState(User user)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
+            var update = Builders<User>.Update.Set(s => s.TrackingEnabled, user.TrackingEnabled);
+            await db.GetCollection<User>("Users").UpdateOneAsync(filter, update);
+        }
+
+        public async Task UpdateUserMuteState(User user)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
+            var update = Builders<User>.Update.Set(s => s.Mute, user.Mute);
+            await db.GetCollection<User>("Users").UpdateOneAsync(filter, update);
+        }
+
+
         public async Task DeleteUser(User user)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
@@ -65,7 +80,6 @@ namespace DrivingNotifierAPI.Data
 
             var contacts = user.Contacts;
             StringBuilder sb = new StringBuilder();
-
 
             foreach (ObjectId id in contacts ){
                 User fetched = GetUser(id);
@@ -94,7 +108,11 @@ namespace DrivingNotifierAPI.Data
             User replier = GetUserByPhone(phoneReplier);
             if(requestor != null && replier != null)
             {
-                var contacts = replier.Contacts;
+                var contacts = new List<ObjectId>();
+                if (replier.Contacts != null)
+                {
+                     contacts = replier.Contacts;
+                }
 
                 contacts.Add(requestor.Id); //We add the ObjectId
 

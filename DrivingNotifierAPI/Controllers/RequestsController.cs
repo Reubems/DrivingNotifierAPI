@@ -22,7 +22,6 @@ namespace DrivingNotifierAPI.Controllers
         }
 
         // GET: api/Requests
-        [Route("Requests")]
         [HttpGet]
         public Task<IEnumerable<Request>> GetRequests()
         {
@@ -48,9 +47,8 @@ namespace DrivingNotifierAPI.Controllers
             return Ok(request);
         }
 
-        // GET: api/PendingRequests
-        [Route("PendingRequests")]
-        [HttpGet("{phone}")]
+        // GET: api/PendingRequests/23453294
+        [HttpGet("PendingRequests/{phone}")]
         public Task<IEnumerable<Request>> GetPendingRequests([FromRoute] string phone)
         {
             return dataRequest.GetPendingRequests(phone);
@@ -58,7 +56,6 @@ namespace DrivingNotifierAPI.Controllers
 
 
         // POST: api/Requests
-
         [HttpPost]
         public async Task<IActionResult> PostRequest([FromBody] Request request)
         {
