@@ -46,43 +46,7 @@ namespace DrivingNotifierAPI.Controllers
 
             return Ok(user);
         }
-        /*
-        // PUT: api/Users/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser([FromRoute] long id, [FromBody] User user)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-        */
-
+       
         // POST: api/Users
 
         [Route("Register")]
@@ -91,7 +55,7 @@ namespace DrivingNotifierAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(ModelState); 
             }
 
             //We only add a new user if its phone does not already exist
@@ -126,8 +90,41 @@ namespace DrivingNotifierAPI.Controllers
             return Ok();
         }
 
-        //------------------------------------------------------------------------------------------
-        
+        // DELETE: api/Users/54235434/39448346
+        [HttpDelete("{phoneRequestor}/{phoneToDelete}")]
+        public async Task<IActionResult> RemoveContact([FromRoute] string phoneRequestor, [FromRoute] string phoneToDelete)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = dataUser.GetUserByPhone(phoneRequestor);
+            var deleted = dataUser.GetUserByPhone(phoneToDelete);
+            if (user == null || deleted == null)
+            {
+                return NotFound();
+            }
+
+            await dataUser.RemoveUserContactList(phoneRequestor, phoneToDelete);
+
+            return Ok();
+        }
+
+        // GET: api/Users/Driving
+        [HttpGet("Driving")]
+        public List<String> GetUsersDriving([FromRoute] string phone)
+        {
+            return dataUser.GetContactsDrivingList(phone);
+        }
+
+        // GET: api/Users/Contacts
+        [HttpGet("Contacts")]
+        public List<String> GetContacts([FromRoute] string phone)
+        {
+            return dataUser.GetContactsList(phone);
+        }
+
         // POST: api/Users/login
         [Route("Login")]
         [HttpPost(Name = "Login")]
@@ -202,6 +199,20 @@ namespace DrivingNotifierAPI.Controllers
             }
 
             await dataUser.UpdateUserMuteState(user);
+
+            return Ok();
+        }
+
+        // PUT: api/Users/Driving
+        [HttpPut("Driving")]
+        public async Task<IActionResult> UpdateUserDrivingState([FromBody] User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await dataUser.UpdateUserDrivingState(user);
 
             return Ok();
         }

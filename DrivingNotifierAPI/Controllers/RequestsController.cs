@@ -92,7 +92,7 @@ namespace DrivingNotifierAPI.Controllers
             if (request.State.Equals(RequestState.ACCEPTED))
             {
                 //Update the list of the replier in the database.
-                await dataUser.UpdateUserContactList(request.RequestorPhone, request.ReplierPhone);
+                await dataUser.AddUserContactList(request.RequestorPhone, request.ReplierPhone);
             }
 
             return Ok(request);

@@ -20,10 +20,8 @@ namespace DrivingNotifierAPI.Models
         public bool TrackingEnabled { get; set; }
         [BsonElement("Mute")]
         public bool Mute { get; set; }
-
-        //Añadir atributo que sea un array de ObjectId con los contactos aceptados por el usuario.  //Swagger does not get it
-        //[BsonElement("Contacts")]
-        //public BsonArray Contacts { get; set; }
+        [BsonElement("Driving")]
+        public bool Driving { get; set; }
 
         [BsonElement("Contacts")]
         [BsonRepresentation(BsonType.String)]
