@@ -1,9 +1,7 @@
 ﻿using DrivingNotifierAPI.Data;
 using DrivingNotifierAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace DrivingNotifierAPI.Controllers
@@ -53,7 +51,6 @@ namespace DrivingNotifierAPI.Controllers
         {
             return dataRequest.GetPendingRequests(phone);
         }
-
 
         // POST: api/Requests
         [HttpPost]

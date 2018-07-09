@@ -1,6 +1,5 @@
 ﻿using DrivingNotifierAPI.Models;
 using MongoDB.Driver;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,49 +10,66 @@ namespace DrivingNotifierAPI.Data
     {
         private MongoClient client;
         private IMongoDatabase db;
+        private readonly string DB_COLLECTION_NAME_REQUESTS = "Requests";
+        private readonly string DB_NAME = "DrivingNotifier";
+        private readonly string DB_CLIENT_URL_LOCAL = "mongodb://localhost:27017";
+        private readonly string DB_CLIENT_URL_REMOTE = "mongodb://dnadmin:"+ PrivateCredentials.PASS_DB_REMOTE +"@" +
+            "drivingnotifier-shard-00-00-i0wld.mongodb.net:27017," +
+            "drivingnotifier-shard-00-01-i0wld.mongodb.net:27017," +
+            "drivingnotifier-shard-00-02-i0wld.mongodb.net:27017/test?" +
+            "ssl=true&replicaSet=DrivingNotifier-shard-0&authSource=admin&retryWrites=true";
 
         public DataAccessRequest()
         {
-
-            client = new MongoClient("mongodb://localhost:27017");
-            db = client.GetDatabase("DrivingNotifier");
-
+            client = new MongoClient(DB_CLIENT_URL_REMOTE);
+            db = client.GetDatabase(DB_NAME);
         }
 
         public async Task<IEnumerable<Request>> GetRequests()
         {
-            return await db.GetCollection<Request>("Requests").Find(_ => true).ToListAsync();
+            return await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).Find(_ => true).ToListAsync();
         }
 
         public Request GetRequest(string requestorPhone, string replierPhone)
         {
-            var filter = Builders<Request>.Filter.And(Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone), Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
-            return db.GetCollection<Request>("Requests").Find(filter).FirstOrDefault();
+            var filter = Builders<Request>.Filter.And(
+                Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone), 
+                Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
+
+            return db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).Find(filter).FirstOrDefault();
         }
 
         public async Task CreateRequest(Request request)
         {
-            await db.GetCollection<Request>("Requests").InsertOneAsync(request);
+            await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).InsertOneAsync(request);
         }
 
         public async Task<IEnumerable<Request>> GetPendingRequests(string phone)
         {
-            var filter = Builders<Request>.Filter.Eq(u => u.ReplierPhone, phone);
-            return await db.GetCollection<Request>("Requests").Find(filter).ToListAsync();
+            var filter = Builders<Request>.Filter.And(
+                Builders<Request>.Filter.Eq(u => u.ReplierPhone, phone), 
+                Builders<Request>.Filter.Eq(u => u.State, RequestState.PENDING));
+
+            return await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).Find(filter).ToListAsync();
         }
 
         public async Task UpdateRequestState(string requestorPhone, string replierPhone, RequestState state)
         {
-            var filter = Builders<Request>.Filter.And(Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone), Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
+            var filter = Builders<Request>.Filter.And(
+                Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone),
+                Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
             var update = Builders<Request>.Update.Set(s => s.State, state);
-            await db.GetCollection<Request>("Requests").UpdateOneAsync(filter, update);
+
+            await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).UpdateOneAsync(filter, update);
         }
 
         public async Task DeleteRequest(string requestorPhone, string replierPhone)
         {
-            var filter = Builders<Request>.Filter.And(Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone), Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
-            await db.GetCollection<Request>("Requests").DeleteOneAsync(filter);
-        }
+            var filter = Builders<Request>.Filter.And(
+                Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone),
+                Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
 
+            await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).DeleteOneAsync(filter);
+        }
     }
 }

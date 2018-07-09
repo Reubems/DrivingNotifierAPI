@@ -1,9 +1,5 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DrivingNotifierAPI.Models
 {
@@ -20,7 +16,7 @@ namespace DrivingNotifierAPI.Models
     }
 
     public enum RequestState
-    {   //In BSON they are 0, 1, 2, 3 respectively.
-        NEW, PENDING, ACCEPTED, DENIED
+    {   //In BSON they are 0, 1, 2 respectively.
+        PENDING, ACCEPTED, DENIED
     }
 }

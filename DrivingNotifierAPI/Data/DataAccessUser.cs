@@ -15,67 +15,82 @@ namespace DrivingNotifierAPI.Data
 
         private MongoClient client;
         private IMongoDatabase db;
+        private readonly string DB_COLLECTION_NAME_USERS = "Users";
+        private readonly string DB_NAME = "DrivingNotifier";
+        private readonly string DB_CLIENT_URL_LOCAL = "mongodb://localhost:27017";
+        private readonly string DB_CLIENT_URL_REMOTE = "mongodb://dnadmin:"+ PrivateCredentials.PASS_DB_REMOTE + "@" +
+            "drivingnotifier-shard-00-00-i0wld.mongodb.net:27017," +
+            "drivingnotifier-shard-00-01-i0wld.mongodb.net:27017," +
+            "drivingnotifier-shard-00-02-i0wld.mongodb.net:27017/test?" +
+            "ssl=true&replicaSet=DrivingNotifier-shard-0&authSource=admin&retryWrites=true";
 
         public DataAccessUser()
         {
-            client = new MongoClient("mongodb://localhost:27017");
-            db = client.GetDatabase("DrivingNotifier");
+            client = new MongoClient(DB_CLIENT_URL_REMOTE);
+            db = client.GetDatabase(DB_NAME);
         }
 
         public async Task<IEnumerable<User>> GetUsers()
         {
-            return await db.GetCollection<User>("Users").Find(_ => true).ToListAsync();
+            return await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(_ => true).ToListAsync();
         }
 
         public User GetUser(ObjectId id)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Id, id);
-            return  db.GetCollection<User>("Users").Find(filter).FirstOrDefault();
+
+            return  db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(filter).FirstOrDefault();
         }
 
         public  User GetUserByPhone(string phone)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Phone, phone);
-            return db.GetCollection<User>("Users").Find(filter).FirstOrDefault();
+
+            return db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(filter).FirstOrDefault();
         }
 
         public async Task InsertUser(User user)
         {
-            await db.GetCollection<User>("Users").InsertOneAsync(user);
+            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).InsertOneAsync(user);
         }
 
         public async Task UpdateUserPlayerID(User user)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
             var update = Builders<User>.Update.Set(s => s.PlayerID, user.PlayerID);
-            await db.GetCollection<User>("Users").UpdateOneAsync(filter, update);
+
+            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
         }
 
         public async Task UpdateUserTrackingEnabledState(User user)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
             var update = Builders<User>.Update.Set(s => s.TrackingEnabled, user.TrackingEnabled);
-            await db.GetCollection<User>("Users").UpdateOneAsync(filter, update);
+
+            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
         }
 
         public async Task UpdateUserMuteState(User user)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
             var update = Builders<User>.Update.Set(s => s.Mute, user.Mute);
-            await db.GetCollection<User>("Users").UpdateOneAsync(filter, update);
+
+            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
         }
 
         public async Task UpdateUserDrivingState(User user)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
             var update = Builders<User>.Update.Set(s => s.Driving, user.Driving);
-            await db.GetCollection<User>("Users").UpdateOneAsync(filter, update);
+
+            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
         }
 
         public async Task DeleteUser(User user)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
-            await db.GetCollection<User>("Users").DeleteOneAsync(filter);
+
+            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).DeleteOneAsync(filter);
         }
 
         //Push notification
@@ -130,7 +145,7 @@ namespace DrivingNotifierAPI.Data
 
                 var filter = Builders<User>.Filter.Eq(u => u.Phone, replier.Phone);
                 var update = Builders<User>.Update.Set(s => s.Contacts, contacts);
-                await db.GetCollection<User>("Users").UpdateOneAsync(filter, update);
+                await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
             }
         }
 
@@ -147,7 +162,8 @@ namespace DrivingNotifierAPI.Data
 
                 var filter = Builders<User>.Filter.Eq(u => u.Phone, requestor.Phone);
                 var update = Builders<User>.Update.Set(s => s.Contacts, contacts);
-                await db.GetCollection<User>("Users").UpdateOneAsync(filter, update);
+
+                await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
             }
         }
 

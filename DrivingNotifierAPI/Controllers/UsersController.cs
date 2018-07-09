@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using DrivingNotifierAPI.Models;
 using DrivingNotifierAPI.Data;
 
@@ -90,8 +87,8 @@ namespace DrivingNotifierAPI.Controllers
             return Ok();
         }
 
-        // DELETE: api/Users/54235434/39448346
-        [HttpDelete("{phoneRequestor}/{phoneToDelete}")]
+        // DELETE: api/Users/Contacts/54235434/39448346
+        [HttpDelete("Contacts/{phoneRequestor}/{phoneToDelete}")]
         public async Task<IActionResult> RemoveContact([FromRoute] string phoneRequestor, [FromRoute] string phoneToDelete)
         {
             if (!ModelState.IsValid)
