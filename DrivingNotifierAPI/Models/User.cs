@@ -12,19 +12,19 @@ namespace DrivingNotifierAPI.Models
     {
         [BsonId]
         public ObjectId Id { get; set; }
-        [BsonElement("Phone")]
+        [BsonElement("phone")]
         public string Phone { get; set; }
-        [BsonElement("PlayerID")]
+        [BsonElement("playerID")]
         public string PlayerID { get; set; }
-        [BsonElement("TrackingEnabled")]
+        [BsonElement("trackingEnabled")]
         public bool TrackingEnabled { get; set; }
-        [BsonElement("Mute")]
+        [BsonElement("mute")]
         public bool Mute { get; set; }
-        [BsonElement("Driving")]
+        [BsonElement("driving")]
         public bool Driving { get; set; }
-        [BsonElement("LastUpdate")]
+        [BsonElement("lastUpdate")]
         public DateTime LastUpdate { get; set; }
-        [BsonElement("Contacts")]
+        [BsonElement("contacts")]
         [BsonRepresentation(BsonType.String)]
         public List<ObjectId> Contacts { get; set; }
     }
