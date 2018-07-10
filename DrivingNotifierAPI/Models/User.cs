@@ -22,6 +22,8 @@ namespace DrivingNotifierAPI.Models
         public bool Mute { get; set; }
         [BsonElement("Driving")]
         public bool Driving { get; set; }
+        [BsonElement("LastUpdate")]
+        public DateTime LastUpdate { get; set; }
         [BsonElement("Contacts")]
         [BsonRepresentation(BsonType.String)]
         public List<ObjectId> Contacts { get; set; }

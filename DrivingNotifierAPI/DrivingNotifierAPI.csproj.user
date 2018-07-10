@@ -11,5 +11,6 @@
     <WebStackScaffolding_LayoutPageFile />
     <WebStackScaffolding_DbContextTypeFullName>DrivingNotifierAPI.Models.DrivingNotifierAPIContext</WebStackScaffolding_DbContextTypeFullName>
     <WebStackScaffolding_IsAsyncSelected>False</WebStackScaffolding_IsAsyncSelected>
+    <NameOfLastUsedPublishProfile>DrivingNotifierAPI20180709102032 - Web Deploy</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>

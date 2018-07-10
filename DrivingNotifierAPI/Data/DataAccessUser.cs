@@ -81,7 +81,9 @@ namespace DrivingNotifierAPI.Data
         public async Task UpdateUserDrivingState(User user)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
-            var update = Builders<User>.Update.Set(s => s.Driving, user.Driving);
+            var update = Builders<User>.Update.
+                Set(s => s.Driving, user.Driving).
+                Set(s => s.LastUpdate, DateTime.Now);
 
             await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
         }
