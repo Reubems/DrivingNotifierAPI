@@ -13,7 +13,7 @@ namespace DrivingNotifierAPI.Data
 
          As the repository where the code is hosted is private, that configuration is not mandatory.
 
-         */
+     */
     public class PrivateCredentials
     {
         public static readonly string PASS_DB_REMOTE = "dnpass";

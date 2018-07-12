@@ -41,6 +41,7 @@ namespace DrivingNotifierAPI.Data
 
         public async Task CreateRequest(Request request)
         {
+            //TODO: check if both phones correspond to a user in the system.
             await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).InsertOneAsync(request);
         }
 
