@@ -105,7 +105,7 @@ namespace DrivingNotifierAPI.Controllers
 
             await dataUser.RemoveUserContactList(phoneRequestor, phoneToDelete);
 
-            return Ok();
+            return Ok(deleted);
         }
 
         // GET: api/Users/Driving

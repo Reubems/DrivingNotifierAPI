@@ -12,7 +12,7 @@ namespace DrivingNotifierAPI.Data
         private IMongoDatabase db;
         private readonly string DB_COLLECTION_NAME_REQUESTS = "Requests";
         private readonly string DB_NAME = "DrivingNotifier";
-        private readonly string DB_CLIENT_URL_LOCAL = "mongodb://localhost:27017";
+        //private readonly string DB_CLIENT_URL_LOCAL = "mongodb://localhost:27017";
         private readonly string DB_CLIENT_URL_REMOTE = "mongodb://dnadmin:"+ PrivateCredentials.PASS_DB_REMOTE +"@" +
             "drivingnotifier-shard-00-00-i0wld.mongodb.net:27017," +
             "drivingnotifier-shard-00-01-i0wld.mongodb.net:27017," +

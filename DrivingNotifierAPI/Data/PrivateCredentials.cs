@@ -11,7 +11,7 @@ namespace DrivingNotifierAPI.Data
          For doing so, it should be added a new line in the .gitignore file or the corresponding file related to that
          version control system.
 
-         As the repository where the code is hosted is private, that configuration is not mandatory.
+         As the repository where the code is hosted is private, that configuration is not mandatory for now.
 
      */
     public class PrivateCredentials
