@@ -105,9 +105,12 @@ namespace DrivingNotifierAPI.Data
 
             foreach (ObjectId id in contacts ){
                 User fetched = GetUser(id);
-                string playerID = fetched.PlayerID;
-                string playerIDformatted = string.Format("\"{0}\",", playerID);
-                sb.Append(playerIDformatted);
+                if(fetched.Mute == false)
+                {
+                    string playerID = fetched.PlayerID;
+                    string playerIDformatted = string.Format("\"{0}\",", playerID);
+                    sb.Append(playerIDformatted);
+                }    
             }
             sb.Remove(sb.Length - 1, 1); //To remove the last ",".
 
@@ -181,6 +184,7 @@ namespace DrivingNotifierAPI.Data
             User requestor = GetUserByPhone(phone);
 
             return requestor.Contacts != null ? requestor.Contacts
+                .Where(e => GetUser(e).TrackingEnabled == true)
                 .Where(e => GetUser(e).Driving == true)
                 .Select(e => GetUser(e).Phone)
                 .ToList() : new List<string>();
