@@ -30,11 +30,11 @@ namespace DrivingNotifierAPI.Data
             return await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).Find(_ => true).ToListAsync();
         }
 
-        public Request GetRequest(string requestorPhone, string replierPhone)
+        public Request GetRequest(string requestorEmail, string replierEmail)
         {
             var filter = Builders<Request>.Filter.And(
-                Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone), 
-                Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
+                Builders<Request>.Filter.Eq(u => u.ReplierEmail, replierEmail), 
+                Builders<Request>.Filter.Eq(u => u.RequestorEmail, requestorEmail));
 
             return db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).Find(filter).FirstOrDefault();
         }
@@ -45,30 +45,30 @@ namespace DrivingNotifierAPI.Data
             await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).InsertOneAsync(request);
         }
 
-        public async Task<IEnumerable<Request>> GetPendingRequests(string phone)
+        public async Task<IEnumerable<Request>> GetPendingRequests(string currentEmail)
         {
             var filter = Builders<Request>.Filter.And(
-                Builders<Request>.Filter.Eq(u => u.ReplierPhone, phone), 
+                Builders<Request>.Filter.Eq(u => u.ReplierEmail, currentEmail), 
                 Builders<Request>.Filter.Eq(u => u.State, RequestState.PENDING));
 
             return await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).Find(filter).ToListAsync();
         }
 
-        public async Task UpdateRequestState(string requestorPhone, string replierPhone, RequestState state)
+        public async Task UpdateRequestState(string requestorEmail, string replierEmail, RequestState state)
         {
             var filter = Builders<Request>.Filter.And(
-                Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone),
-                Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
+                Builders<Request>.Filter.Eq(u => u.ReplierEmail, replierEmail),
+                Builders<Request>.Filter.Eq(u => u.RequestorEmail, requestorEmail));
             var update = Builders<Request>.Update.Set(s => s.State, state);
 
             await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).UpdateOneAsync(filter, update);
         }
 
-        public async Task DeleteRequest(string requestorPhone, string replierPhone)
+        public async Task DeleteRequest(string requestorEmail, string replierEmail)
         {
             var filter = Builders<Request>.Filter.And(
-                Builders<Request>.Filter.Eq(u => u.ReplierPhone, replierPhone),
-                Builders<Request>.Filter.Eq(u => u.RequestorPhone, requestorPhone));
+                Builders<Request>.Filter.Eq(u => u.ReplierEmail, replierEmail),
+                Builders<Request>.Filter.Eq(u => u.RequestorEmail, requestorEmail));
 
             await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).DeleteOneAsync(filter);
         }

@@ -41,9 +41,9 @@ namespace DrivingNotifierAPI.Data
             return  db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(filter).FirstOrDefault();
         }
 
-        public  User GetUserByPhone(string phone)
+        public  User GetUserByEmail(string email)
         {
-            var filter = Builders<User>.Filter.Eq(u => u.Phone, phone);
+            var filter = Builders<User>.Filter.Eq(u => u.Email, email);
 
             return db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(filter).FirstOrDefault();
         }
@@ -55,7 +55,7 @@ namespace DrivingNotifierAPI.Data
 
         public async Task UpdateUserPlayerID(User user)
         {
-            var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
+            var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
             var update = Builders<User>.Update.Set(s => s.PlayerID, user.PlayerID);
 
             await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
@@ -63,7 +63,7 @@ namespace DrivingNotifierAPI.Data
 
         public async Task UpdateUserTrackingEnabledState(User user)
         {
-            var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
+            var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
             var update = Builders<User>.Update.Set(s => s.TrackingEnabled, user.TrackingEnabled);
 
             await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
@@ -71,7 +71,7 @@ namespace DrivingNotifierAPI.Data
 
         public async Task UpdateUserMuteState(User user)
         {
-            var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
+            var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
             var update = Builders<User>.Update.Set(s => s.Mute, user.Mute);
 
             await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
@@ -79,7 +79,7 @@ namespace DrivingNotifierAPI.Data
 
         public async Task UpdateUserDrivingState(User user)
         {
-            var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
+            var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
             var update = Builders<User>.Update.
                 Set(s => s.Driving, user.Driving).
                 Set(s => s.LastUpdate, DateTime.Now);
@@ -89,16 +89,16 @@ namespace DrivingNotifierAPI.Data
 
         public async Task DeleteUser(User user)
         {
-            var filter = Builders<User>.Filter.Eq(u => u.Phone, user.Phone);
+            var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
 
             await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).DeleteOneAsync(filter);
         }
 
         //Push notification
 
-        public void PushNotification(string phone) 
+        public void PushNotification(string email) 
         {
-            User user = GetUserByPhone(phone);
+            User user = GetUserByEmail(email);
 
             var contacts = user.Contacts;
             StringBuilder sb = new StringBuilder();
@@ -129,10 +129,10 @@ namespace DrivingNotifierAPI.Data
         }
 
         //Add to Contacts List
-        public async Task AddUserContactList(string phoneRequestor, string phoneReplier)
+        public async Task AddUserContactList(string emailRequestor, string emailReplier)
         {
-            User requestor = GetUserByPhone(phoneRequestor);
-            User replier = GetUserByPhone(phoneReplier);
+            User requestor = GetUserByEmail(emailRequestor);
+            User replier = GetUserByEmail(emailReplier);
             if(requestor != null && replier != null)
             {
                 var contacts = new List<ObjectId>(); //In case we save the first contact.
@@ -147,24 +147,24 @@ namespace DrivingNotifierAPI.Data
                     contacts.Add(requestor.Id); //We add the ObjectId
                 }
 
-                var filter = Builders<User>.Filter.Eq(u => u.Phone, replier.Phone);
+                var filter = Builders<User>.Filter.Eq(u => u.Email, replier.Email);
                 var update = Builders<User>.Update.Set(s => s.Contacts, contacts);
                 await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
             }
         }
 
         //Remove from Contacts List
-        public async Task RemoveUserContactList(string phoneRequestor, string phoneToDelete)
+        public async Task RemoveUserContactList(string emailRequestor, string emailToDelete)
         {
-            User requestor = GetUserByPhone(phoneRequestor);
-            User deleted = GetUserByPhone(phoneToDelete);
+            User requestor = GetUserByEmail(emailRequestor);
+            User deleted = GetUserByEmail(emailToDelete);
             if (requestor != null && deleted != null && requestor.Contacts != null)
             {
                 var contacts = requestor.Contacts;
                 
                 contacts.Remove(deleted.Id); //We remove the ObjectId
 
-                var filter = Builders<User>.Filter.Eq(u => u.Phone, requestor.Phone);
+                var filter = Builders<User>.Filter.Eq(u => u.Email, requestor.Email);
                 var update = Builders<User>.Update.Set(s => s.Contacts, contacts);
 
                 await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
@@ -173,20 +173,20 @@ namespace DrivingNotifierAPI.Data
 
         public List<string> GetContactsList(string phone)
         {
-            User requestor = GetUserByPhone(phone);
+            User requestor = GetUserByEmail(phone);
 
             return requestor.Contacts != null ? requestor.Contacts.
-                Select(e => GetUser(e).Phone).ToList() : new List<string>();
+                Select(e => GetUser(e).Email).ToList() : new List<string>();
         }
 
-        public List<string> GetContactsDrivingList(string phone)
+        public List<string> GetContactsDrivingList(string email)
         {
-            User requestor = GetUserByPhone(phone);
+            User requestor = GetUserByEmail(email);
 
             return requestor.Contacts != null ? requestor.Contacts
                 .Where(e => GetUser(e).TrackingEnabled == true)
                 .Where(e => GetUser(e).Driving == true)
-                .Select(e => GetUser(e).Phone)
+                .Select(e => GetUser(e).Email)
                 .ToList() : new List<string>();
         }
     }

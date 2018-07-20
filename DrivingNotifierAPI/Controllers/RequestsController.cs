@@ -27,15 +27,15 @@ namespace DrivingNotifierAPI.Controllers
         }
 
         // GET: api/Requests/53452345/23452343
-        [HttpGet("{requestorPhone}/{replierPhone}", Name = "getRequestByPhones")]
-        public IActionResult GetRequest([FromRoute] string requestorPhone, [FromRoute] string replierPhone)
+        [HttpGet("{requestorEmail}/{replierEmail}", Name = "getRequestByEmails")]
+        public IActionResult GetRequest([FromRoute] string requestorEmail, [FromRoute] string replierEmail)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var request = dataRequest.GetRequest(requestorPhone, replierPhone);
+            var request = dataRequest.GetRequest(requestorEmail, replierEmail);
 
             if (request == null)
             {
@@ -46,10 +46,10 @@ namespace DrivingNotifierAPI.Controllers
         }
 
         // GET: api/PendingRequests/23453294
-        [HttpGet("PendingRequests/{phone}")]
-        public Task<IEnumerable<Request>> GetPendingRequests([FromRoute] string phone)
+        [HttpGet("PendingRequests/{email}")]
+        public Task<IEnumerable<Request>> GetPendingRequests([FromRoute] string email)
         {
-            return dataRequest.GetPendingRequests(phone);
+            return dataRequest.GetPendingRequests(email);
         }
 
         // POST: api/Requests
@@ -62,11 +62,11 @@ namespace DrivingNotifierAPI.Controllers
             }
 
             //We only add a new request if that does not already exist
-            var requestFetched = dataRequest.GetRequest(request.RequestorPhone, request.ReplierPhone);
+            var requestFetched = dataRequest.GetRequest(request.RequestorEmail, request.ReplierEmail);
             if (requestFetched == null)
             {
                 await dataRequest.CreateRequest(request);
-                return Ok(); //TODO change for other // https://github.com/Microsoft/aspnet-api-versioning/issues/18
+                return Ok(request); //TODO change for other // https://github.com/Microsoft/aspnet-api-versioning/issues/18
             }
 
             return BadRequest(ModelState);
@@ -79,38 +79,38 @@ namespace DrivingNotifierAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var requestFetched = dataRequest.GetRequest(request.RequestorPhone, request.ReplierPhone);
+            var requestFetched = dataRequest.GetRequest(request.RequestorEmail, request.ReplierEmail);
             if (requestFetched != null)
             {
-                await dataRequest.UpdateRequestState(request.RequestorPhone, request.ReplierPhone, request.State);
+                await dataRequest.UpdateRequestState(request.RequestorEmail, request.ReplierEmail, request.State);
             }
 
             // Add the ObjectId to the Contacts lists of the user, in case request is accepted.
             if (request.State.Equals(RequestState.ACCEPTED))
             {
                 //Update the list of the replier in the database.
-                await dataUser.AddUserContactList(request.RequestorPhone, request.ReplierPhone);
+                await dataUser.AddUserContactList(request.RequestorEmail, request.ReplierEmail);
             }
 
             return Ok(request);
         }
 
         // DELETE: api/Requests/54235434/23452346
-        [HttpDelete("{requestorPhone}/{replierPhone}")]
-        public async Task<IActionResult> DeleteRequest([FromRoute] string requestorPhone, [FromRoute] string replierPhone)
+        [HttpDelete("{requestorEmail}/{replierEmail}")]
+        public async Task<IActionResult> DeleteRequest([FromRoute] string requestorEmail, [FromRoute] string replierEmail)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var request = dataRequest.GetRequest(requestorPhone, replierPhone);
+            var request = dataRequest.GetRequest(requestorEmail, replierEmail);
             if (request == null)
             {
                 return NotFound();
             }
 
-            await dataRequest.DeleteRequest(requestorPhone, replierPhone);
+            await dataRequest.DeleteRequest(requestorEmail, replierEmail);
 
             return Ok();
         }

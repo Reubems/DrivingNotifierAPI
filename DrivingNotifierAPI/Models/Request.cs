@@ -7,10 +7,10 @@ namespace DrivingNotifierAPI.Models
     {
         [BsonId]
         public ObjectId Id { get; set; }
-        [BsonElement("requestorPhone")]
-        public string RequestorPhone { get; set; }
-        [BsonElement("replierPhone")]
-        public string ReplierPhone { get; set; }
+        [BsonElement("requestorEmail")]
+        public string RequestorEmail { get; set; }
+        [BsonElement("replierEmail")]
+        public string ReplierEmail { get; set; }
         [BsonElement("state")]
         public RequestState State { get; set; }
     }

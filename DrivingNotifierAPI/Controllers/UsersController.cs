@@ -26,15 +26,15 @@ namespace DrivingNotifierAPI.Controllers
         }
 
         // GET: api/Users/53452345
-        [HttpGet("{phone}", Name = "getUserByPhoneNumber")]
-        public IActionResult GetUser([FromRoute] string phone)
+        [HttpGet("{email}", Name = "getUserByEmail")]
+        public IActionResult GetUser([FromRoute] string email)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = dataUser.GetUserByPhone(phone);
+            var user = dataUser.GetUserByEmail(email);
 
             if (user == null)
             {
@@ -55,9 +55,9 @@ namespace DrivingNotifierAPI.Controllers
                 return BadRequest(ModelState); 
             }
 
-            //We only add a new user if its phone does not already exist
-            var usersWithThatPhone = dataUser.GetUserByPhone(user.Phone);
-            if (usersWithThatPhone == null)
+            //We only add a new user if its email does not already exist
+            var usersWithThatEmail = dataUser.GetUserByEmail(user.Email);
+            if (usersWithThatEmail == null)
             {
                 await dataUser.InsertUser(user);
                 return Ok();
@@ -68,15 +68,15 @@ namespace DrivingNotifierAPI.Controllers
 
 
         // DELETE: api/Users/54235434
-        [HttpDelete("{phone}")]
-        public async Task<IActionResult> DeleteUser([FromRoute] string phone)
+        [HttpDelete("{email}")]
+        public async Task<IActionResult> DeleteUser([FromRoute] string email)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = dataUser.GetUserByPhone(phone);
+            var user = dataUser.GetUserByEmail(email);
             if (user == null)
             {
                 return NotFound();
@@ -88,38 +88,38 @@ namespace DrivingNotifierAPI.Controllers
         }
 
         // DELETE: api/Users/Contacts/54235434/39448346
-        [HttpDelete("Contacts/{phoneRequestor}/{phoneToDelete}")]
-        public async Task<IActionResult> RemoveContact([FromRoute] string phoneRequestor, [FromRoute] string phoneToDelete)
+        [HttpDelete("Contacts/{emailRequestor}/{emailToDelete}")]
+        public async Task<IActionResult> RemoveContact([FromRoute] string emailRequestor, [FromRoute] string emailToDelete)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = dataUser.GetUserByPhone(phoneRequestor);
-            var deleted = dataUser.GetUserByPhone(phoneToDelete);
+            var user = dataUser.GetUserByEmail(emailRequestor);
+            var deleted = dataUser.GetUserByEmail(emailToDelete);
             if (user == null || deleted == null)
             {
                 return NotFound();
             }
 
-            await dataUser.RemoveUserContactList(phoneRequestor, phoneToDelete);
+            await dataUser.RemoveUserContactList(emailRequestor, emailToDelete);
 
             return Ok(deleted);
         }
 
         // GET: api/Users/Driving
         [HttpGet("Driving")]
-        public List<String> GetUsersDriving([FromRoute] string phone)
+        public List<String> GetUsersDriving([FromRoute] string email)
         {
-            return dataUser.GetContactsDrivingList(phone);
+            return dataUser.GetContactsDrivingList(email);
         }
 
         // GET: api/Users/Contacts
         [HttpGet("Contacts")]
-        public List<String> GetContacts([FromRoute] string phone)
+        public List<String> GetContacts([FromRoute] string email)
         {
-            return dataUser.GetContactsList(phone);
+            return dataUser.GetContactsList(email);
         }
 
         // POST: api/Users/login
@@ -139,10 +139,10 @@ namespace DrivingNotifierAPI.Controllers
 
         private async Task CheckPlayerIdAsync(User user)
         {
-            string phone = user.Phone;
+            string phone = user.Email;
             string playerId = user.PlayerID;
 
-            var userFetched =  dataUser.GetUserByPhone(user.Phone);
+            var userFetched =  dataUser.GetUserByEmail(user.Email);
             if (userFetched!= null && userFetched.PlayerID != user.PlayerID)
             {
                 //Update the playerId
@@ -153,21 +153,21 @@ namespace DrivingNotifierAPI.Controllers
         // POST: api/Users/PushNotification
         [Route("PushNotification")]
         [HttpPost(Name = "PushNotification")]
-        public IActionResult PushNotification([FromBody] string drivingPhone)
+        public IActionResult PushNotification([FromBody] string drivingEmail)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = dataUser.GetUserByPhone(drivingPhone);
+            var user = dataUser.GetUserByEmail(drivingEmail);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            dataUser.PushNotification(drivingPhone);
+            dataUser.PushNotification(drivingEmail);
             
             return NoContent();
         }
