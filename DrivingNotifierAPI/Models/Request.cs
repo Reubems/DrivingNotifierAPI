@@ -7,6 +7,8 @@ namespace DrivingNotifierAPI.Models
     {
         [BsonId]
         public ObjectId Id { get; set; }
+        [BsonElement("requestorUsername")]
+        public string RequestorUsername { get; set; }
         [BsonElement("requestorEmail")]
         public string RequestorEmail { get; set; }
         [BsonElement("replierEmail")]
