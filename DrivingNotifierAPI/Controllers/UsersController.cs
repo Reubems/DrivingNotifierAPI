@@ -127,6 +127,7 @@ namespace DrivingNotifierAPI.Controllers
         [HttpPost(Name = "Login")]
         public async Task<IActionResult> LoginUser([FromBody] User user)
         {
+            //TODO Check password and return user.
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

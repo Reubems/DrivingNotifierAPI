@@ -10,6 +10,7 @@ namespace DrivingNotifierAPI.Models
 {
     public class User
     {
+        //TODO Add Password and full name.
         [BsonId]
         public ObjectId Id { get; set; }
         [BsonElement("username")]

@@ -1,5 +1,7 @@
 ﻿using DrivingNotifierAPI.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,6 +32,13 @@ namespace DrivingNotifierAPI.Data
             return await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).Find(_ => true).ToListAsync();
         }
 
+        public Request GetRequest(String id)
+        {
+            var filter = Builders<Request>.Filter.Eq(u => u.IdEntity, id);
+
+            return db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).Find(filter).FirstOrDefault();
+        }
+
         public Request GetRequest(string requestorEmail, string replierEmail)
         {
             var filter = Builders<Request>.Filter.And(
@@ -41,7 +50,11 @@ namespace DrivingNotifierAPI.Data
 
         public async Task CreateRequest(Request request)
         {
-            //TODO: check if both phones correspond to a user in the system.
+            Random random = new Random();
+            int num = random.Next();
+            string hexString = num.ToString("X2");
+            string hexValue = DateTime.Now.Ticks.ToString("X2");
+            request.IdEntity = hexValue+hexString;
             await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).InsertOneAsync(request);
         }
 
@@ -54,12 +67,44 @@ namespace DrivingNotifierAPI.Data
             return await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).Find(filter).ToListAsync();
         }
 
+
+        public async Task AcceptRequest(string id)
+        {
+            var filter = Builders<Request>.Filter.And(
+                Builders<Request>.Filter.Eq(u => u.IdEntity, id),
+                Builders<Request>.Filter.Eq(u => u.State, RequestState.PENDING));
+            var update = Builders<Request>.Update.Set(s => s.State, RequestState.ACCEPTED);
+            var request = GetRequest(id);
+            var dataUser = new DataAccessUser();
+            await dataUser.AddUserContactList(request.RequestorEmail, request.ReplierEmail);
+            await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).UpdateOneAsync(filter, update);
+        }
+
+        public async Task DeclineRequest(string id)
+        {
+            var filter = Builders<Request>.Filter.And(
+                Builders<Request>.Filter.Eq(u => u.IdEntity, id),
+                Builders<Request>.Filter.Eq(u => u.State, RequestState.PENDING));
+            var update = Builders<Request>.Update.Set(s => s.State, RequestState.DENIED);
+            await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).UpdateOneAsync(filter, update);
+        }
+
         public async Task UpdateRequestState(string requestorEmail, string replierEmail, RequestState state)
         {
             var filter = Builders<Request>.Filter.And(
                 Builders<Request>.Filter.Eq(u => u.ReplierEmail, replierEmail),
                 Builders<Request>.Filter.Eq(u => u.RequestorEmail, requestorEmail));
             var update = Builders<Request>.Update.Set(s => s.State, state);
+
+            await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).UpdateOneAsync(filter, update);
+        }
+
+        public async Task UpdateRequestHexCode(string requestorEmail, string replierEmail, string hexCode)
+        {
+            var filter = Builders<Request>.Filter.And(
+                Builders<Request>.Filter.Eq(u => u.ReplierEmail, replierEmail),
+                Builders<Request>.Filter.Eq(u => u.RequestorEmail, requestorEmail));
+            var update = Builders<Request>.Update.Set(s => s.IdEntity, hexCode);
 
             await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).UpdateOneAsync(filter, update);
         }
