@@ -10,20 +10,19 @@ using System.Threading.Tasks;
 
 namespace DrivingNotifierAPI.Utilities
 {
-    public class EmailParser
+    public class VerifyAccountEmail
     {
         private static readonly String apiBaseUrl = "http://drivingnotifierapi20180709102032.azurewebsites.net";
         //private static readonly String apiBaseUrl = "http://localhost:2522";
-       
-        public static async Task SendAcceptanceEmail(Request petition)
+
+        public static async Task SendVerifyEmail(Models.User user)
         {
 
-            var dataRequest = new DataAccessRequest();
-            var requestFetched = dataRequest.GetRequest(petition.RequestorEmail, petition.ReplierEmail);
-            String id = requestFetched.IdEntity.ToString();
-            String urlAcceptance = apiBaseUrl + "/api/Requests/PendingRequests/Accept/" + id;
-            String urlDeclination = apiBaseUrl + "/api/Requests/PendingRequests/Decline/" + id;
-
+            var dataUser = new DataAccessUser();
+            var userFetched = dataUser.GetUserByEmail(user.Email);
+            String id = userFetched.IdEntity.ToString();
+            String urlVerification = apiBaseUrl + "/api/Users/ActivateAccount/" + id;
+            String urlDeclination = apiBaseUrl + "/api/Users/DeleteUser/" + id;
 
             MailjetClient client = new MailjetClient("aaa4cc8830c2429e4ded6fe052dd58b4", "a7b15b276450f99715b15ee20f3e4ece")
             //MailjetClient client = new MailjetClient(Environment.GetEnvironmentVariable("MJ_APIKEY_PUBLIC"), Environment.GetEnvironmentVariable("MJ_APIKEY_PRIVATE"))
@@ -42,19 +41,20 @@ namespace DrivingNotifierAPI.Utilities
                   }},
                  {"To", new JArray {
                   new JObject {
-                   {"Email", petition.ReplierEmail},
-                   {"Name", petition.ReplierEmail}
+                   {"Email", user.Email},
+                   {"Name", user.Email}
                    }
                   }},
-                 {"Subject", "Your email flight plan!"},
+                 {"Subject", "Welcome to Driving Notifier App!"},
                  {"TemplateLanguage", true},
-                 {"HTMLPart",@"<!DOCTYPE html>
-<html xmlns='http://www.w3.org/1999/xhtml' xmlns:v='urn:schemas-microsoft-com:vml' xmlns:o='urn:schemas-microsoft-com:office:office'><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+                 {"HTMLPart",@"<!doctype html>
+<html xmlns='http://www.w3.org/1999/xhtml' xmlns:v='urn:schemas-microsoft-com:vml' xmlns:o='urn:schemas-microsoft-com:office:office'>
+<head>
   <title>Someone wants to add you!</title>
   <!--[if !mso]><!-- -->
   <meta http-equiv='X-UA-Compatible' content='IE=edge'>
   <!--<![endif]-->
-
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
 <style type='text/css'>
   #outlook a { padding: 0; }
@@ -105,7 +105,7 @@ namespace DrivingNotifierAPI.Utilities
       <table role='presentation' border='0' cellpadding='0' cellspacing='0'>
         <tr>
           <td style='vertical-align:top;width:600px;'>
-      <![endif]--><div class='mj-column-per-100 outlook-group-fix' style='vertical-align:top;display:inline-block;direction:ltr;font-size:13px;text-align:left;width:100%;'><table role='presentation' cellpadding='0' cellspacing='0' width='100%' border='0'><tbody><tr><td style='word-wrap:break-word;font-size:0px;padding:10px 25px;padding-top:0px;padding-bottom:0px;padding-right:0px;padding-left:0px;' align='center'><table role='presentation' cellpadding='0' cellspacing='0' style='border-collapse:collapse;border-spacing:0px;' align='center' border='0'><tbody><tr><td style='width:600px;'><img alt=' title=' height='auto' src='http://90p1.mjt.lu/tplimg/90p1/b/644m/sr8y.jpeg' style='border:none;border-radius:;display:block;font-size:13px;outline:none;text-decoration:none;width:100%;height:auto;' width='600'></td></tr></tbody></table></td></tr></tbody></table></div><!--[if mso | IE]>
+      <![endif]--><div class='mj-column-per-100 outlook-group-fix' style='vertical-align:top;display:inline-block;direction:ltr;font-size:13px;text-align:left;width:100%;'><table role='presentation' cellpadding='0' cellspacing='0' width='100%' border='0'><tbody><tr><td style='word-wrap:break-word;font-size:0px;padding:10px 25px;padding-top:0px;padding-bottom:0px;padding-right:0px;padding-left:0px;' align='center'><table role='presentation' cellpadding='0' cellspacing='0' style='border-collapse:collapse;border-spacing:0px;' align='center' border='0'><tbody><tr><td style='width:577px;'><img alt=' title=' height='auto' src='http://90p1.mjt.lu/tplimg/90p1/b/6u2s/1pwj.jpeg' style='border:none;border-radius:;display:block;font-size:13px;outline:none;text-decoration:none;width:100%;height:auto;' width='577'></td></tr></tbody></table></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
       <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
@@ -118,7 +118,7 @@ namespace DrivingNotifierAPI.Utilities
       <table role='presentation' border='0' cellpadding='0' cellspacing='0'>
         <tr>
           <td style='vertical-align:top;width:600px;'>
-      <![endif]--><div class='mj-column-per-100 outlook-group-fix' style='vertical-align:top;display:inline-block;direction:ltr;font-size:13px;text-align:left;width:100%;'><table role='presentation' cellpadding='0' cellspacing='0' width='100%' border='0'><tbody><tr><td style='word-wrap:break-word;font-size:0px;padding:0px 25px 0px 25px;padding-top:0px;padding-bottom:0px;' align='left'><div style='cursor:auto;color:#55575d;font-family:Arial, sans-serif;font-size:13px;line-height:22px;text-align:left;'><h1 style='font-size: 20px; font-weight: bold;'>CONTACT wants to add you!</h1></div></td></tr><tr><td style='word-wrap:break-word;font-size:0px;padding:0px 25px 0px 25px;padding-top:0px;padding-bottom:0px;' align='left'><div style='cursor:auto;color:#55575d;font-family:Arial, sans-serif;font-size:13px;line-height:22px;text-align:left;'><p style='font-size: 13px; margin: 10px 0;'>Hello,</p><p style='font-size: 13px; margin: 10px 0;'>You have received a new request from CONTACT with the following email: EMAIL . If you know this person and want to add it, please click on the Accept button. Otherwise, if&nbsp; you do not know this person, please click on the Decline button.</p></div></td></tr></tbody></table></div><!--[if mso | IE]>
+      <![endif]--><div class='mj-column-per-100 outlook-group-fix' style='vertical-align:top;display:inline-block;direction:ltr;font-size:13px;text-align:left;width:100%;'><table role='presentation' cellpadding='0' cellspacing='0' width='100%' border='0'><tbody><tr><td style='word-wrap:break-word;font-size:0px;padding:0px 25px 0px 25px;padding-top:0px;padding-bottom:0px;' align='left'><div style='cursor:auto;color:#55575d;font-family:Arial, sans-serif;font-size:13px;line-height:22px;text-align:left;'><h1 style='font-size: 20px; font-weight: bold;'>WELCOME to Driving Notifier App!</h1></div></td></tr><tr><td style='word-wrap:break-word;font-size:0px;padding:0px 25px 0px 25px;padding-top:0px;padding-bottom:0px;' align='left'><div style='cursor:auto;color:#55575d;font-family:Arial, sans-serif;font-size:13px;line-height:22px;text-align:left;'><p style='font-size: 13px; margin: 10px 0;'>Hello " + user.FullName +@" ,</p><p style='font-size: 13px; margin: 10px 0;'>From the Driving Notifier Team, we would like to give you our warmest welcome to our App. To start using Driving Notifier App you still need to verify your e-mail by clicking the next button:</p></div></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
       <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
@@ -131,7 +131,7 @@ namespace DrivingNotifierAPI.Utilities
       <table role='presentation' border='0' cellpadding='0' cellspacing='0'>
         <tr>
           <td style='vertical-align:top;width:600px;'>
-      <![endif]--><div class='mj-column-per-100 outlook-group-fix' style='vertical-align:top;display:inline-block;direction:ltr;font-size:13px;text-align:left;width:100%;'><table role='presentation' cellpadding='0' cellspacing='0' width='100%' border='0'><tbody><tr><td style='word-wrap:break-word;font-size:0px;padding:10px 25px;' align='center'><table role='presentation' cellpadding='0' cellspacing='0' style='border-collapse:separate;' align='center' border='0'><tbody><tr><td style='border:none;border-radius:3px;color:#ffffff;cursor:auto;padding:10px 25px;' align='center' valign='middle' bgcolor='#3782d2'><a href='" + urlAcceptance +@"' style='text-decoration:none;background:#3782d2;color:#ffffff;font-family:Arial, sans-serif;font-size:13px;font-weight:normal;line-height:120%;text-transform:none;margin:0px;' target='_blank'><b>Accept</b></a></td></tr></tbody></table></td><td style='word-wrap:break-word;font-size:0px;padding:10px 25px;' align='center'><table role='presentation' cellpadding='0' cellspacing='0' style='border-collapse:separate;' align='center' border='0'><tbody><tr><td style='border:none;border-radius:3px;color:#ffffff;cursor:auto;padding:10px 25px 10px 25px;' align='center' valign='middle' bgcolor='#c83131'><a href='" + urlDeclination +@"' style='text-decoration:none;background:#c83131;color:#ffffff;font-family:Arial, sans-serif;font-size:13px;font-weight:normal;line-height:120%;text-transform:none;margin:0px;' target='_blank'><b>Decline</b></a></td></tr></tbody></table></td></tr></tbody></table></div><!--[if mso | IE]>
+      <![endif]--><div class='mj-column-per-100 outlook-group-fix' style='vertical-align:top;display:inline-block;direction:ltr;font-size:13px;text-align:left;width:100%;'><table role='presentation' cellpadding='0' cellspacing='0' width='100%' border='0'><tbody><tr><td style='word-wrap:break-word;font-size:0px;padding:10px 25px;' align='center'><table role='presentation' cellpadding='0' cellspacing='0' style='border-collapse:separate;' align='center' border='0'><tbody><tr><td style='border:none;border-radius:3px;color:#ffffff;cursor:auto;padding:10px 25px;' align='center' valign='middle' bgcolor='#20a79c'><a href='" + urlVerification + @"' style='text-decoration:none;background:#20a79c;color:#ffffff;font-family:Arial, sans-serif;font-size:13px;font-weight:normal;line-height:120%;text-transform:none;margin:0px;' target='_blank'><b>Verify</b></a></td></tr></tbody></table></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
       <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
@@ -144,7 +144,7 @@ namespace DrivingNotifierAPI.Utilities
       <table role='presentation' border='0' cellpadding='0' cellspacing='0'>
         <tr>
           <td style='vertical-align:top;width:600px;'>
-      <![endif]--><div class='mj-column-per-100 outlook-group-fix' style='vertical-align:top;display:inline-block;direction:ltr;font-size:13px;text-align:left;width:100%;'><table role='presentation' cellpadding='0' cellspacing='0' width='100%' border='0'><tbody><tr><td style='word-wrap:break-word;font-size:0px;padding:10px 25px;padding-top:0px;padding-bottom:0px;' align='left'><div style='cursor:auto;color:#55575d;font-family:Arial, sans-serif;font-size:13px;line-height:22px;text-align:left;'><p style='font-size: 13px; margin: 10px 0;'>Once you have clicked the linked above, CONTACT and you will become contacts.</p><p style='font-size: 13px; margin: 10px 0;'>&nbsp;</p></div></td></tr></tbody></table></div><!--[if mso | IE]>
+      <![endif]--><div class='mj-column-per-100 outlook-group-fix' style='vertical-align:top;display:inline-block;direction:ltr;font-size:13px;text-align:left;width:100%;'><table role='presentation' cellpadding='0' cellspacing='0' width='100%' border='0'><tbody><tr><td style='word-wrap:break-word;font-size:0px;padding:10px 25px;padding-top:0px;padding-bottom:0px;' align='left'><div style='cursor:auto;color:#55575d;font-family:Arial, sans-serif;font-size:13px;line-height:22px;text-align:left;'><p style='font-size: 13px; margin: 10px 0;'>If you have not registered and created a new account, please ignore this message and click <a target='_blank' href='"+ urlDeclination +@"' style='color: rgb(32, 167, 156);'><span style='color:#20a79c'>here</span></a>.</p><p style='font-size: 13px; margin: 10px 0;'>THANK YOU for using Driving Notifier.</p><p style='font-size: 13px; margin: 10px 0;'> </p></div></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
       <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
@@ -162,8 +162,8 @@ namespace DrivingNotifierAPI.Utilities
       <![endif]--></td></tr></tbody></table></div><!--[if mso | IE]>
       </td></tr></table>
       <![endif]--></div>
-
-</body></html>"}
+</body>
+</html>"}
                  }
                    });
             MailjetResponse response = await client.PostAsync(request);

@@ -10,15 +10,20 @@ namespace DrivingNotifierAPI.Models
 {
     public class User
     {
-        //TODO Add Password and full name.
         [BsonId]
         public ObjectId Id { get; set; }
-        [BsonElement("username")]
-        public string Username { get; set; }
+        [BsonElement("fullName")]
+        [BsonIgnoreIfNull]
+        public string IdEntity { get; set; }
+        public string FullName { get; set; }
+        [BsonElement("password")]
+        public string Password { get; set; }
         [BsonElement("email")]
         public string Email { get; set; }
         [BsonElement("playerID")]
         public string PlayerID { get; set; }
+        [BsonElement("accountActivated")]
+        public bool AccountActivated { get; set; }
         [BsonElement("trackingEnabled")]
         public bool TrackingEnabled { get; set; }
         [BsonElement("mute")]

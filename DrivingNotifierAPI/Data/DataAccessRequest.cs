@@ -55,6 +55,7 @@ namespace DrivingNotifierAPI.Data
             string hexString = num.ToString("X2");
             string hexValue = DateTime.Now.Ticks.ToString("X2");
             request.IdEntity = hexValue+hexString;
+            request.State = RequestState.PENDING;
             await db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).InsertOneAsync(request);
         }
 

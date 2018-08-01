@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using DrivingNotifierAPI.Utilities;
 
 namespace DrivingNotifierAPI.Data
 {
@@ -41,6 +42,13 @@ namespace DrivingNotifierAPI.Data
             return  db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(filter).FirstOrDefault();
         }
 
+        public User GetUser(String id)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.IdEntity, id);
+
+            return db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(filter).FirstOrDefault();
+        }
+
         public  User GetUserByEmail(string email)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Email, email);
@@ -50,7 +58,29 @@ namespace DrivingNotifierAPI.Data
 
         public async Task InsertUser(User user)
         {
+            Random random = new Random();
+            int num = random.Next();
+            string hexString = num.ToString("X2");
+            string hexValue = DateTime.Now.Ticks.ToString("X2");
+            user.IdEntity = hexValue + hexString;
+            user.AccountActivated = false;
+            user.TrackingEnabled = false;
+            user.Mute = false;
+            user.Driving = false;
+
             await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).InsertOneAsync(user);
+            await VerifyAccountEmail.SendVerifyEmail(user);
+
+        }
+
+        public async Task UpdateAllUsersDrivingState()
+        {
+            DateTime tenMinutesAgo = DateTime.Now.AddMinutes(-10);
+
+            var filter = Builders<User>.Filter.Eq(u => u.LastUpdate < tenMinutesAgo, true);
+            var update = Builders<User>.Update.Set(s => s.Driving, false);
+
+            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
         }
 
         public async Task UpdateUserPlayerID(User user)
@@ -67,6 +97,14 @@ namespace DrivingNotifierAPI.Data
             var update = Builders<User>.Update.Set(s => s.TrackingEnabled, user.TrackingEnabled);
 
             await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
+        }
+
+        public async Task UpdateUserActivateAccount(User user)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
+            var update = Builders<User>.Update.Set(s => s.AccountActivated, true);
+
+            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);      
         }
 
         public async Task UpdateUserMuteState(User user)
@@ -90,6 +128,13 @@ namespace DrivingNotifierAPI.Data
         public async Task DeleteUser(User user)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
+
+            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).DeleteOneAsync(filter);
+        }
+
+        public async Task DeleteUser(string userId)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.IdEntity, userId);
 
             await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).DeleteOneAsync(filter);
         }
@@ -182,10 +227,12 @@ namespace DrivingNotifierAPI.Data
         public List<string> GetContactsDrivingList(string email)
         {
             User requestor = GetUserByEmail(email);
+            DateTime tenMinutesAgo = DateTime.Now.AddMinutes(-10);
 
             return requestor.Contacts != null ? requestor.Contacts
                 .Where(e => GetUser(e).TrackingEnabled == true)
                 .Where(e => GetUser(e).Driving == true)
+                .Where(e => GetUser(e).LastUpdate > tenMinutesAgo)
                 .Select(e => GetUser(e).Email)
                 .ToList() : new List<string>();
         }

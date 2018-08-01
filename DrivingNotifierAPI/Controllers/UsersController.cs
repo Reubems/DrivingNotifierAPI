@@ -43,7 +43,26 @@ namespace DrivingNotifierAPI.Controllers
 
             return Ok(user);
         }
-       
+
+        // GET: api/Users/53452345
+        [HttpGet("DeleteUser/{userId}")]
+        public IActionResult DeleteUser([FromRoute] string userId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var user = dataUser.DeleteUser(userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return Ok();
+        }
+
         // POST: api/Users
 
         [Route("Register")]
@@ -69,7 +88,7 @@ namespace DrivingNotifierAPI.Controllers
 
         // DELETE: api/Users/54235434
         [HttpDelete("{email}")]
-        public async Task<IActionResult> DeleteUser([FromRoute] string email)
+        public async Task<IActionResult> DeleteUserByEmail([FromRoute] string email)
         {
             if (!ModelState.IsValid)
             {
@@ -110,8 +129,10 @@ namespace DrivingNotifierAPI.Controllers
 
         // GET: api/Users/Driving
         [HttpGet("Driving")]
-        public List<String> GetUsersDriving([FromRoute] string email)
+        public async Task<List<string>> GetUsersDrivingAsync([FromRoute] string email)
         {
+            await dataUser.UpdateAllUsersDrivingState();
+
             return dataUser.GetContactsDrivingList(email);
         }
 
@@ -120,6 +141,22 @@ namespace DrivingNotifierAPI.Controllers
         public List<String> GetContacts([FromRoute] string email)
         {
             return dataUser.GetContactsList(email);
+        }
+
+        // GET: api/Users/ActivateAccount
+        [HttpGet("ActivateAccount/{userId}")]
+        public async Task<IActionResult> ActivateAccount([FromRoute] string userId)
+        {
+            var user = dataUser.GetUser(userId);
+
+            if (user != null && user.AccountActivated == false)
+            {
+                await dataUser.UpdateUserActivateAccount(user);
+
+                return Ok();
+            }
+
+            return NotFound();
         }
 
         // POST: api/Users/login
@@ -132,10 +169,14 @@ namespace DrivingNotifierAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            User logged = dataUser.GetUserByEmail(user.Email);
+            if(logged.AccountActivated == false || !logged.Password.Equals(user.Password))
+            {
+                return NotFound();
+            }
             await CheckPlayerIdAsync(user);
 
-            return Ok(); //CreatedAtAction("ActionMethodName", dto);
+            return Ok(logged); //CreatedAtAction("ActionMethodName", dto);
         }
 
         private async Task CheckPlayerIdAsync(User user)

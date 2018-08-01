@@ -79,16 +79,23 @@ namespace DrivingNotifierAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-            //TODO I need to check that there exist a user with the replier email of the request. If it doesn't return 400 fx.
-            
+            // I check that there exists a user with the replier email of the request. If it doesn't return 400 fx.
+            var replierUser = dataUser.GetUserByEmail(request.RequestorEmail);
+            if (replierUser == null)
+            {
+                return NotFound();
+            }
+
             //We only add a new request if that does not already exist
             var requestFetched = dataRequest.GetRequest(request.RequestorEmail, request.ReplierEmail);
+            var requestorUser = dataUser.GetUserByEmail(request.RequestorEmail);
             if (requestFetched == null)
             {
+                request.RequestorUsername = requestorUser.FullName;
                 await dataRequest.CreateRequest(request);
 
                 //TODO Send Email
-                await EmailParser.SendAcceptanceEmail(request);
+                await SendRequestEmail.SendAcceptanceEmail(request);
 
 
                 return Ok(request); //TODO change for other // https://github.com/Microsoft/aspnet-api-versioning/issues/18
