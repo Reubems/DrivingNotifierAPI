@@ -89,7 +89,7 @@ namespace DrivingNotifierAPI.Controllers
             //We only add a new request if that does not already exist
             var requestFetched = dataRequest.GetRequest(request.RequestorEmail, request.ReplierEmail);
             var requestorUser = dataUser.GetUserByEmail(request.RequestorEmail);
-            if (requestFetched == null)
+            if (requestFetched == null && !requestorUser.Contacts.Contains(replierUser.Id))
             {
                 request.RequestorUsername = requestorUser.FullName;
                 await dataRequest.CreateRequest(request);

@@ -12,9 +12,10 @@ namespace DrivingNotifierAPI.Models
     {
         [BsonId]
         public ObjectId Id { get; set; }
-        [BsonElement("fullName")]
+        [BsonElement("idEntity")]
         [BsonIgnoreIfNull]
         public string IdEntity { get; set; }
+        [BsonElement("fullName")]
         public string FullName { get; set; }
         [BsonElement("password")]
         public string Password { get; set; }

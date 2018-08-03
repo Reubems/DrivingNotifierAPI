@@ -63,13 +63,14 @@ namespace DrivingNotifierAPI.Data
             string hexString = num.ToString("X2");
             string hexValue = DateTime.Now.Ticks.ToString("X2");
             user.IdEntity = hexValue + hexString;
-            user.AccountActivated = false;
+            // user.AccountActivated = false; // TODO: Uncomment
+            user.AccountActivated = true; // TODO: Delete Line
             user.TrackingEnabled = false;
             user.Mute = false;
             user.Driving = false;
 
             await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).InsertOneAsync(user);
-            await VerifyAccountEmail.SendVerifyEmail(user);
+           // await VerifyAccountEmail.SendVerifyEmail(user); // TODO: Uncomment
 
         }
 
@@ -216,9 +217,9 @@ namespace DrivingNotifierAPI.Data
             }
         }
 
-        public List<string> GetContactsList(string phone)
+        public List<string> GetContactsList(string email)
         {
-            User requestor = GetUserByEmail(phone);
+            User requestor = GetUserByEmail(email);
 
             return requestor.Contacts != null ? requestor.Contacts.
                 Select(e => GetUser(e).Email).ToList() : new List<string>();

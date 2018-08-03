@@ -26,7 +26,7 @@ namespace DrivingNotifierAPI.Controllers
         }
 
         // GET: api/Users/53452345
-        [HttpGet("{email}", Name = "getUserByEmail")]
+        [HttpGet("{email}")]
         public IActionResult GetUser([FromRoute] string email)
         {
             if (!ModelState.IsValid)
@@ -128,7 +128,7 @@ namespace DrivingNotifierAPI.Controllers
         }
 
         // GET: api/Users/Driving
-        [HttpGet("Driving")]
+        [HttpGet("Driving/{email}")]
         public async Task<List<string>> GetUsersDrivingAsync([FromRoute] string email)
         {
             await dataUser.UpdateAllUsersDrivingState();
@@ -137,7 +137,7 @@ namespace DrivingNotifierAPI.Controllers
         }
 
         // GET: api/Users/Contacts
-        [HttpGet("Contacts")]
+        [HttpGet("Contacts/{email}")]
         public List<String> GetContacts([FromRoute] string email)
         {
             return dataUser.GetContactsList(email);
@@ -164,7 +164,6 @@ namespace DrivingNotifierAPI.Controllers
         [HttpPost(Name = "Login")]
         public async Task<IActionResult> LoginUser([FromBody] User user)
         {
-            //TODO Check password and return user.
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
