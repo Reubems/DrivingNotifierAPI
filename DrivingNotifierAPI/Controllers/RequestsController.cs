@@ -94,9 +94,7 @@ namespace DrivingNotifierAPI.Controllers
                 request.RequestorUsername = requestorUser.FullName;
                 await dataRequest.CreateRequest(request);
 
-                //TODO Send Email
                 await SendRequestEmail.SendAcceptanceEmail(request);
-
 
                 return Ok(request); //TODO change for other // https://github.com/Microsoft/aspnet-api-versioning/issues/18
             }
@@ -115,13 +113,20 @@ namespace DrivingNotifierAPI.Controllers
             if (requestFetched != null)
             {
                 await dataRequest.UpdateRequestState(request.RequestorEmail, request.ReplierEmail, request.State);
-            }
 
-            // Add the ObjectId to the Contacts lists of the user, in case request is accepted.
-            if (request.State.Equals(RequestState.ACCEPTED))
+                // Add the ObjectId to the Contacts lists of the user, in case request is accepted.
+                if (request.State.Equals(RequestState.ACCEPTED))
+                {
+                    //Update the list of the replier in the database.
+                    await dataUser.AddUserContactList(requestFetched.RequestorEmail, requestFetched.ReplierEmail);
+                } else if (request.State.Equals(RequestState.DENIED))  //We delete the request.
+                {
+                    await dataRequest.DeleteRequest(requestFetched.RequestorEmail, requestFetched.ReplierEmail);
+                }
+
+            } else
             {
-                //Update the list of the replier in the database.
-                await dataUser.AddUserContactList(request.RequestorEmail, request.ReplierEmail);
+                return NotFound();
             }
 
             return Ok(request);

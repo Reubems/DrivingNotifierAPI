@@ -67,7 +67,7 @@ namespace DrivingNotifierAPI.Controllers
 
         [Route("Register")]
         [HttpPost(Name = "Register")]
-        public async Task<IActionResult> PostUser([FromBody] User user)
+        public IActionResult PostUser([FromBody] User user)
         {
             if (!ModelState.IsValid)
             {
@@ -78,7 +78,8 @@ namespace DrivingNotifierAPI.Controllers
             var usersWithThatEmail = dataUser.GetUserByEmail(user.Email);
             if (usersWithThatEmail == null)
             {
-                await dataUser.InsertUser(user);
+                dataUser.InsertUser(user);
+
                 return Ok();
             }
 
@@ -159,6 +160,42 @@ namespace DrivingNotifierAPI.Controllers
             return NotFound();
         }
 
+        // GET: api/Users/ResetPassword
+        [HttpGet("ResetPassword/{email}")]
+        public async Task<IActionResult> ResetPassword([FromRoute] string email)
+        {
+            var user = dataUser.GetUserByEmail(email);
+
+            if (user != null && user.AccountActivated != false)
+            {
+                await dataUser.SendResetPasswordEmail(user);
+
+                return Ok();
+            }
+
+            return NotFound();
+        }
+
+        // POST: api/Users/UpdatePassword
+        [Route("UpdatePassword")]
+        [HttpPost(Name = "UpdatePassword")]
+        public async Task<IActionResult> UpdatePassword([FromBody] User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            User logged = dataUser.GetUserByEmail(user.Email);
+            if (logged != null && logged.AccountActivated != false)
+            {
+                await dataUser.UpdatePassword(user);
+
+                return Ok();
+            }
+
+            return NotFound(); 
+        }
+
         // POST: api/Users/login
         [Route("Login")]
         [HttpPost(Name = "Login")]
@@ -174,6 +211,13 @@ namespace DrivingNotifierAPI.Controllers
                 return NotFound();
             }
             await CheckPlayerIdAsync(user);
+            //Extra security when sending data back.
+            logged.Password = "";
+            logged.ResetCode = "";
+            logged.Contacts = null;
+            logged.Email = "";
+            logged.FullName = "";
+            logged.PlayerID = "";
 
             return Ok(logged); //CreatedAtAction("ActionMethodName", dto);
         }
@@ -194,21 +238,21 @@ namespace DrivingNotifierAPI.Controllers
         // POST: api/Users/PushNotification
         [Route("PushNotification")]
         [HttpPost(Name = "PushNotification")]
-        public IActionResult PushNotification([FromBody] string drivingEmail)
+        public IActionResult PushNotification([FromBody] string email)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var user = dataUser.GetUserByEmail(drivingEmail);
+            var user = dataUser.GetUserByEmail(email);
 
             if (user == null)
             {
                 return NotFound();
             }
 
-            dataUser.PushNotification(drivingEmail);
+            dataUser.PushNotification(email);
             
             return NoContent();
         }
@@ -251,6 +295,20 @@ namespace DrivingNotifierAPI.Controllers
             }
 
             await dataUser.UpdateUserDrivingState(user);
+
+            return Ok();
+        }
+
+        // PUT: api/Users/TrackingEnabled
+        [HttpPut("ResetPassword")]
+        public async Task<IActionResult> UpdateUserPassword([FromBody] User user)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await dataUser.UpdatePassword(user);
 
             return Ok();
         }

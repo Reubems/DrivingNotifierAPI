@@ -43,7 +43,8 @@ namespace DrivingNotifierAPI.Data
         {
             var filter = Builders<Request>.Filter.And(
                 Builders<Request>.Filter.Eq(u => u.ReplierEmail, replierEmail), 
-                Builders<Request>.Filter.Eq(u => u.RequestorEmail, requestorEmail));
+                Builders<Request>.Filter.Eq(u => u.RequestorEmail, requestorEmail),
+                Builders<Request>.Filter.Eq(u => u.State, RequestState.PENDING));
 
             return db.GetCollection<Request>(DB_COLLECTION_NAME_REQUESTS).Find(filter).FirstOrDefault();
         }

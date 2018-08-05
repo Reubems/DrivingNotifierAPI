@@ -12,7 +12,7 @@ namespace DrivingNotifierAPI.Utilities
 {
     public class VerifyAccountEmail
     {
-        private static readonly String apiBaseUrl = "http://drivingnotifierapi20180709102032.azurewebsites.net";
+        private static readonly String apiBaseUrl = "https://drivingnotifierapi20180709102032.azurewebsites.net";
         //private static readonly String apiBaseUrl = "http://localhost:2522";
 
         public static async Task SendVerifyEmail(Models.User user)

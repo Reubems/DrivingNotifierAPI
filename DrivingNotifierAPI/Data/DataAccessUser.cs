@@ -17,6 +17,7 @@ namespace DrivingNotifierAPI.Data
         private IMongoDatabase db;
         private readonly string DB_COLLECTION_NAME_USERS = "Users";
         private readonly string DB_NAME = "DrivingNotifier";
+        private IMongoCollection<User> collection;
         //private readonly string DB_CLIENT_URL_LOCAL = "mongodb://localhost:27017";
         private readonly string DB_CLIENT_URL_REMOTE = "mongodb://dnadmin:"+ PrivateCredentials.PASS_DB_REMOTE + "@" +
             "drivingnotifier-shard-00-00-i0wld.mongodb.net:27017," +
@@ -28,35 +29,39 @@ namespace DrivingNotifierAPI.Data
         {
             client = new MongoClient(DB_CLIENT_URL_REMOTE);
             db = client.GetDatabase(DB_NAME);
+            collection = db.GetCollection<User>(DB_COLLECTION_NAME_USERS);
+            IndexKeysDefinition<User> keys = "{ email: 1 }";
+            var indexModel = new CreateIndexModel<User>(keys);
+            collection.Indexes.CreateOneAsync(indexModel);
         }
 
         public async Task<IEnumerable<User>> GetUsers()
         {
-            return await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(_ => true).ToListAsync();
+            return await collection.Find(_ => true).ToListAsync();
         }
 
         public User GetUser(ObjectId id)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Id, id);
 
-            return  db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(filter).FirstOrDefault();
+            return collection.Find(filter).FirstOrDefault();
         }
 
         public User GetUser(String id)
         {
             var filter = Builders<User>.Filter.Eq(u => u.IdEntity, id);
 
-            return db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(filter).FirstOrDefault();
+            return collection.Find(filter).FirstOrDefault();
         }
 
-        public  User GetUserByEmail(string email)
+        public User GetUserByEmail(string email)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Email, email);
 
-            return db.GetCollection<User>(DB_COLLECTION_NAME_USERS).Find(filter).FirstOrDefault();
+            return collection.Find(filter).FirstOrDefault();
         }
 
-        public async Task InsertUser(User user)
+        public void InsertUser(User user)
         {
             Random random = new Random();
             int num = random.Next();
@@ -68,8 +73,9 @@ namespace DrivingNotifierAPI.Data
             user.TrackingEnabled = false;
             user.Mute = false;
             user.Driving = false;
+            user.ResetCode = new string(hexString.ToCharArray());
 
-            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).InsertOneAsync(user);
+            collection.InsertOneAsync(user);
            // await VerifyAccountEmail.SendVerifyEmail(user); // TODO: Uncomment
 
         }
@@ -81,7 +87,7 @@ namespace DrivingNotifierAPI.Data
             var filter = Builders<User>.Filter.Eq(u => u.LastUpdate < tenMinutesAgo, true);
             var update = Builders<User>.Update.Set(s => s.Driving, false);
 
-            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
+            await collection.UpdateOneAsync(filter, update);
         }
 
         public async Task UpdateUserPlayerID(User user)
@@ -89,7 +95,12 @@ namespace DrivingNotifierAPI.Data
             var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
             var update = Builders<User>.Update.Set(s => s.PlayerID, user.PlayerID);
 
-            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
+            await collection.UpdateOneAsync(filter, update);
+        }
+
+        public async Task SendResetPasswordEmail(User user)
+        {
+            await ResetPasswordEmail.SendResetPasswordEmail(user);
         }
 
         public async Task UpdateUserTrackingEnabledState(User user)
@@ -97,7 +108,7 @@ namespace DrivingNotifierAPI.Data
             var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
             var update = Builders<User>.Update.Set(s => s.TrackingEnabled, user.TrackingEnabled);
 
-            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
+            await collection.UpdateOneAsync(filter, update);
         }
 
         public async Task UpdateUserActivateAccount(User user)
@@ -105,7 +116,7 @@ namespace DrivingNotifierAPI.Data
             var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
             var update = Builders<User>.Update.Set(s => s.AccountActivated, true);
 
-            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);      
+            await collection.UpdateOneAsync(filter, update);      
         }
 
         public async Task UpdateUserMuteState(User user)
@@ -113,7 +124,7 @@ namespace DrivingNotifierAPI.Data
             var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
             var update = Builders<User>.Update.Set(s => s.Mute, user.Mute);
 
-            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
+            await collection.UpdateOneAsync(filter, update);
         }
 
         public async Task UpdateUserDrivingState(User user)
@@ -123,21 +134,36 @@ namespace DrivingNotifierAPI.Data
                 Set(s => s.Driving, user.Driving).
                 Set(s => s.LastUpdate, DateTime.Now);
 
-            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
+            await collection.UpdateOneAsync(filter, update);
+        }
+
+        public async Task UpdatePassword(User user)
+        {
+            string newCode = new string(DateTime.Now.Ticks.ToString("X").ToCharArray());
+
+            var filter = Builders<User>.Filter.And(
+                Builders<User>.Filter.Eq(u => u.Email, user.Email),
+                Builders<User>.Filter.Eq(u => u.ResetCode, user.ResetCode));
+
+            var update = Builders<User>.Update.
+                Set(s => s.Password, user.Password)
+                .Set(s => s.ResetCode, newCode);
+
+            await collection.UpdateOneAsync(filter, update);
         }
 
         public async Task DeleteUser(User user)
         {
             var filter = Builders<User>.Filter.Eq(u => u.Email, user.Email);
 
-            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).DeleteOneAsync(filter);
+            await collection.DeleteOneAsync(filter);
         }
 
         public async Task DeleteUser(string userId)
         {
             var filter = Builders<User>.Filter.Eq(u => u.IdEntity, userId);
 
-            await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).DeleteOneAsync(filter);
+            await collection.DeleteOneAsync(filter);
         }
 
         //Push notification
@@ -166,7 +192,7 @@ namespace DrivingNotifierAPI.Data
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Authorization", "Basic ZjMyN2JiMDctNDI4ZC00OWI1LWEyZTAtMjBjYTE5MjYzOTk4");
             request.AddParameter("undefined", "{\n\t\"app_id\" : \"29d6b657-f182-41e7-85cd-1807d337fdfc\" ," +
-                "\n\t\"contents\" : { \"en\" : \"I am driving now!\" }," +
+                "\n\t\"contents\" : { \"en\" : \" " + user.FullName + " is driving now!\" }," +
                 "\n\t\"include_player_ids\" : ["+ sb +"]\n}", ParameterType.RequestBody);
             client.ExecuteAsync(request, (response) =>
             {
@@ -195,7 +221,7 @@ namespace DrivingNotifierAPI.Data
 
                 var filter = Builders<User>.Filter.Eq(u => u.Email, replier.Email);
                 var update = Builders<User>.Update.Set(s => s.Contacts, contacts);
-                await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
+                await collection.UpdateOneAsync(filter, update);
             }
         }
 
@@ -213,7 +239,7 @@ namespace DrivingNotifierAPI.Data
                 var filter = Builders<User>.Filter.Eq(u => u.Email, requestor.Email);
                 var update = Builders<User>.Update.Set(s => s.Contacts, contacts);
 
-                await db.GetCollection<User>(DB_COLLECTION_NAME_USERS).UpdateOneAsync(filter, update);
+                await collection.UpdateOneAsync(filter, update);
             }
         }
 
