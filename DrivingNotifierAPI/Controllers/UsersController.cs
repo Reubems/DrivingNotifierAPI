@@ -130,7 +130,7 @@ namespace DrivingNotifierAPI.Controllers
 
         // GET: api/Users/Driving
         [HttpGet("Driving/{email}")]
-        public async Task<List<string>> GetUsersDrivingAsync([FromRoute] string email)
+        public async Task<List<User>> GetUsersDrivingAsync([FromRoute] string email)
         {
             await dataUser.UpdateAllUsersDrivingState();
 

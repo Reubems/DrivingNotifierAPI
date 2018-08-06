@@ -31,7 +31,7 @@ namespace DrivingNotifierAPI.Controllers
             return dataRequest.GetRequests();
         }
 
-        // GET: api/Requests/53452345/23452343
+        // GET: api/Requests/requestor@mail.com/replier@mail.com
         [HttpGet("{requestorEmail}/{replierEmail}", Name = "getRequestByEmails")]
         public IActionResult GetRequest([FromRoute] string requestorEmail, [FromRoute] string replierEmail)
         {
@@ -50,7 +50,7 @@ namespace DrivingNotifierAPI.Controllers
             return Ok(request);
         }
 
-        // GET: api/PendingRequests/23453294
+        // GET: api/PendingRequests/abcsfds@mail.com
         [HttpGet("PendingRequests/{email}")]
         public Task<IEnumerable<Request>> GetPendingRequests([FromRoute] string email)
         {
@@ -132,7 +132,7 @@ namespace DrivingNotifierAPI.Controllers
             return Ok(request);
         }
 
-        // DELETE: api/Requests/54235434/23452346
+        // DELETE: api/Requests/requestor@mail.com/replier@mail.com
         [HttpDelete("{requestorEmail}/{replierEmail}")]
         public async Task<IActionResult> DeleteRequest([FromRoute] string requestorEmail, [FromRoute] string replierEmail)
         {

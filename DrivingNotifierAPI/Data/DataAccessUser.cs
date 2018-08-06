@@ -47,6 +47,17 @@ namespace DrivingNotifierAPI.Data
             return collection.Find(filter).FirstOrDefault();
         }
 
+        public User GetPartialUser(ObjectId id)
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.Id, id);
+            User user = collection.Find(filter).FirstOrDefault();
+            //Extra security when sending data back.
+            user.Password = "";
+            user.ResetCode = "";
+            user.Contacts = null;
+            user.PlayerID = "";
+            return user;
+        }
         public User GetUser(String id)
         {
             var filter = Builders<User>.Filter.Eq(u => u.IdEntity, id);
@@ -251,7 +262,7 @@ namespace DrivingNotifierAPI.Data
                 Select(e => GetUser(e).Email).ToList() : new List<string>();
         }
 
-        public List<string> GetContactsDrivingList(string email)
+        public List<User> GetContactsDrivingList(string email)
         {
             User requestor = GetUserByEmail(email);
             DateTime tenMinutesAgo = DateTime.Now.AddMinutes(-10);
@@ -260,8 +271,8 @@ namespace DrivingNotifierAPI.Data
                 .Where(e => GetUser(e).TrackingEnabled == true)
                 .Where(e => GetUser(e).Driving == true)
                 .Where(e => GetUser(e).LastUpdate > tenMinutesAgo)
-                .Select(e => GetUser(e).Email)
-                .ToList() : new List<string>();
+                .Select(e => GetPartialUser(e))
+                .ToList() : new List<User>();
         }
     }
 }
